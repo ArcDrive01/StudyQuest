@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudyQuest</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f6fb;--card:#fff;--tx:#1d2433;--mu:#6b7488;--ac:#5b6cff;--ac2:#ffb020;--ok:#1fa971;--bad:#e5484d;--bd:#e1e5f0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151f;--card:#1c2030;--tx:#eef0f8;--mu:#9aa3bd;--bd:#2c3248}}
+:root[data-theme="dark"]{--bg:#12151f;--card:#1c2030;--tx:#eef0f8;--mu:#9aa3bd;--bd:#2c3248}
+:root[data-skin="midnight"]{--bg:#0b0f2a;--card:#161b44;--tx:#e8ebff;--mu:#97a0d8;--bd:#2a3170;--ac:#7c8cff}
+:root[data-skin="forest"]{--bg:#e9f5ec;--card:#fff;--tx:#17301f;--mu:#5d7a66;--bd:#cfe5d5;--ac:#1f9d55}
+:root[data-skin="sunset"]{--bg:#fff1e6;--card:#fff;--tx:#3a1f1a;--mu:#8a6a60;--bd:#f5d6c3;--ac:#ff6b4a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:14px}
+header{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px}
+.av{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:28px;background:var(--bg);flex:none;border:3px solid var(--bd)}
+.fr-gold{border-color:#ffc400;box-shadow:0 0 10px #ffc40099}
+.fr-rainbow{border-color:transparent;background:linear-gradient(var(--bg),var(--bg)) padding-box,conic-gradient(red,orange,yellow,lime,cyan,blue,magenta,red) border-box}
+.fr-neon{border-color:#00f5d4;box-shadow:0 0 12px #00f5d4}
+.grow{flex:1;min-width:0}
+.bar{height:10px;background:var(--bd);border-radius:9px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .4s}
+.coins{font-weight:700;white-space:nowrap}
+nav{display:flex;gap:6px;margin:12px 0;overflow-x:auto}
+nav button,.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:9px 14px;border-radius:12px;font:inherit;cursor:pointer;white-space:nowrap}
+nav button.on,.btn.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}.btn.bad{background:var(--bad);color:#fff;border-color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:12px}
+h2,h3{margin:0 0 10px}
+input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit;margin-bottom:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.flip{perspective:900px;height:210px;cursor:pointer;margin-bottom:12px}
+.flip div{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.f div{transform:rotateY(180deg)}
+.flip p{position:absolute;inset:0;margin:0;display:grid;place-items:center;text-align:center;padding:20px;font-size:22px;border-radius:16px;border:2px solid var(--ac);background:var(--card);backface-visibility:hidden}
+.flip p+p{transform:rotateY(180deg);background:var(--ac);color:#fff}
+.opt{display:block;width:100%;text-align:left;margin-bottom:8px}
+.opt.right{background:var(--ok);color:#fff}.opt.wrong{background:var(--bad);color:#fff}
+.tile{padding:14px 8px;text-align:center;border:2px solid var(--bd);border-radius:12px;cursor:pointer;background:var(--card);min-height:60px;display:grid;place-items:center;font-size:14px}
+.tile.sel{border-color:var(--ac)}.tile.done{opacity:.25;pointer-events:none}.tile.no{border-color:var(--bad)}
+.mu{color:var(--mu);font-size:14px}
+.item{text-align:center}.item .big{font-size:38px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ac);color:#fff;padding:10px 18px;border-radius:99px;opacity:0;transition:.3s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+.ws li{margin-bottom:14px}.ws .ln{display:inline-block;border-bottom:1.5px solid var(--tx);min-width:200px}
+.ans .ln{color:var(--ok);border-color:transparent}
+@media print{header,nav,.noprint,.toast{display:none!important}body{background:#fff;color:#000}.card{border:0}}
+</style></head><body><div class="wrap">
+<header id="hd"></header>
+<nav id="nav"></nav>
+<main id="main"></main>
+</div><div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const CFG={url:"https://supabase.com/dashboard/project/dvbwuipizfidpolpuzss",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2Ynd1aXBpemZpZHBvbHB1enNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNjkzODEsImV4cCI6MjEwNjc0NTM4MX0.YlEfYEZE-maXyFvs-R-_wPkqebajqSqrOrzgEhU46Ys"}; // <-- paste your Supabase values here
+const $=s=>document.querySelector(s);
+const SHOP=[
+{id:"skin-midnight",t:"skin",n:"Midnight",e:"🌌",c:80,v:"midnight"},
+{id:"skin-forest",t:"skin",n:"Forest",e:"🌲",c:80,v:"forest"},
+{id:"skin-sunset",t:"skin",n:"Sunset",e:"🌅",c:80,v:"sunset"},
+{id:"fr-gold",t:"frame",n:"Gold Frame",e:"🥇",c:120,v:"fr-gold"},
+{id:"fr-neon",t:"frame",n:"Neon Frame",e:"💡",c:150,v:"fr-neon"},
+{id:"fr-rainbow",t:"frame",n:"Rainbow Frame",e:"🌈",c:250,v:"fr-rainbow"},
+{id:"av-octo",t:"avatar",n:"Octopus",e:"🐙",c:60,v:"🐙"},
+{id:"av-dragon",t:"avatar",n:"Dragon",e:"🐲",c:100,v:"🐲"},
+{id:"av-unicorn",t:"avatar",n:"Unicorn",e:"🦄",c:100,v:"🦄"},
+{id:"av-robot",t:"avatar",n:"Robot",e:"🤖",c:120,v:"🤖"},
+{id:"av-wizard",t:"avatar",n:"Wizard",e:"🧙",c:180,v:"🧙"}];
+const FREE_AV=["🦊","🐱","🐼","🐸"];
+const def={name:"Student",xp:0,coins:20,own:[],eq:{skin:"",frame:"",avatar:"🦊"},streak:0,last:"",
+decks:[{id:1,name:"Sample: Planets",cards:[["Closest planet to the Sun","Mercury"],["Largest planet","Jupiter"],["Planet with prominent rings","Saturn"],["The Red Planet","Mars"],["Hottest planet","Venus"],["Planet we live on","Earth"]]}]};
+let S;try{S=Object.assign({},def,JSON.parse(localStorage.getItem("sq")||"{}"))}catch(e){S=structuredClone(def)}
+let T,V=0,busy=false,user=null;
+const save=()=>{try{localStorage.setItem("sq",JSON.stringify(S))}catch(e){}V++;clearTimeout(T);T=setTimeout(cloud,1500)};
+let tab="home",deckId=S.decks[0]?.id,mode=null,G={};
+const lvl=()=>Math.floor(S.xp/100)+1;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1800)}
+function gain(xp,c,why){const o=lvl();S.xp+=xp;S.coins+=c;save();toast(`+${xp} XP  +${c} 🪙 ${why||""}`);if(lvl()>o){S.coins+=25;save();setTimeout(()=>toast(`🎉 Level ${lvl()}! +25 🪙 bonus`),1900)}head()}
+function streak(){const d=new Date().toDateString();if(S.last!==d){const y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===y?S.streak+1:1;S.last=d;save();if(S.streak>1)setTimeout(()=>gain(10*S.streak,0,`🔥 ${S.streak}-day streak`),500)}}
+function applySkin(){document.documentElement.dataset.skin=S.eq.skin||""}
+function head(){applySkin();$("#hd").innerHTML=`<div class="av ${S.eq.frame}">${S.eq.avatar}</div><div class="grow"><b>${esc(S.name)}</b> · Level ${lvl()} <span class="mu">🔥 ${S.streak}</span><div class="bar"><i style="width:${S.xp%100}%"></i></div><div class="mu">${S.xp%100}/100 XP to next level</div></div><div class="coins">🪙 ${S.coins}</div>`;
+$("#nav").innerHTML=[["home","🏠 Home"],["decks","🗂 Decks"],["study","🎓 Study"],["shop","🛍 Shop"],["lib","🌐 Library"],["me","👤 Profile"]].map(([k,l])=>`<button class="${tab===k?"on":""}" onclick="go('${k}')">${l}</button>`).join("")}
+function go(t){tab=t;mode=null;render()}
+const deck=()=>S.decks.find(d=>d.id==deckId);
+function deckSel(){return `<select onchange="deckId=this.value;mode=null;render()">${S.decks.map(d=>`<option value="${d.id}" ${d.id==deckId?"selected":""}>${esc(d.name)} (${d.cards.length})</option>`).join("")}</select>`}
+function render(){head();const m=$("#main");({home,decks,study,shop,lib,me})[tab](m)}
+function home(m){const cards=S.decks.reduce((a,d)=>a+d.cards.length,0);
+m.innerHTML=`<div class="card"><h2>Welcome back, ${esc(S.name)}! 👋</h2><p class="mu">Build decks, then study them your way. Every session earns XP and coins for cosmetics.</p><div class="row"><button class="btn p" onclick="go('study')">Start studying</button><button class="btn" onclick="go('decks')">Make a deck</button></div></div>
+<div class="grid"><div class="card item"><div class="big">🗂</div><b>${S.decks.length}</b><div class="mu">decks</div></div><div class="card item"><div class="big">🃏</div><b>${cards}</b><div class="mu">cards</div></div><div class="card item"><div class="big">⭐</div><b>${S.xp}</b><div class="mu">total XP</div></div></div>
+<div class="card"><h3>Earn rewards</h3><p class="mu">Flashcard "Got it": +3 XP · Quiz answer: +5 XP · Match game: up to +40 XP · Perfect quiz: bonus coins · Daily streak bonus</p></div>`}
+function decks(m){const d=deck();
+m.innerHTML=`<div class="card"><h3>New deck</h3><div class="row"><input id="dn" placeholder="Deck name (e.g. Biology Ch. 4)" style="flex:1"><button class="btn p" onclick="addDeck()">Create</button></div>
+<div class="row" style="margin-bottom:8px"><input id="ic" placeholder="Got a shared deck? Paste its link or code" style="flex:1"><button class="btn" onclick="if(importCode($('#ic').value))render()">Import</button></div>
+<details><summary class="mu">Bulk import</summary><textarea id="imp" rows="4" placeholder="One card per line: question | answer"></textarea><button class="btn" onclick="imp()">Import into selected deck</button></details></div>
+${S.decks.length?`<div class="card"><h3>Edit deck</h3>${deckSel()}<div class="row"><input id="q" placeholder="Front / question" style="flex:1"><input id="a" placeholder="Back / answer" style="flex:1"><button class="btn p" onclick="addCard()">Add</button></div>
+${d.cards.map((c,i)=>`<div class="row" style="border-top:1px solid var(--bd);padding:6px 0"><span class="grow">${esc(c[0])} <b>→</b> ${esc(c[1])}</span><button class="btn" onclick="delCard(${i})">✕</button></div>`).join("")||'<p class="mu">No cards yet.</p>'}
+<div class="row" style="margin-top:10px"><button class="btn p" onclick="shareDeck()">🔗 Share link</button><button class="btn p" onclick="pubDeck()">🌐 Publish to library</button><button class="btn bad" onclick="delDeck()">Delete deck</button></div>
+<textarea id="sc" rows="3" readonly style="display:none;margin-top:8px"></textarea></div>`:""}`}
+const enc=d=>btoa(unescape(encodeURIComponent(JSON.stringify({n:d.name,c:d.cards}))));
+function shareDeck(){const link=location.href.split("#")[0]+"#deck="+enc(deck());const t=$("#sc");t.style.display="block";t.value=link;t.select();try{navigator.clipboard.writeText(link).then(()=>toast("Link copied!"),()=>toast("Copy the text below"))}catch(e){toast("Copy the text below")}}
+function importCode(s){try{s=(s||"").trim();const i=s.indexOf("deck=");if(i>=0)s=s.slice(i+5);const o=JSON.parse(decodeURIComponent(escape(atob(s))));if(!o.n||!Array.isArray(o.c))throw 0;const d={id:Date.now(),name:o.n,cards:o.c.filter(c=>c[0]&&c[1]).map(c=>[String(c[0]),String(c[1])])};S.decks.push(d);deckId=d.id;save();toast(`Imported "${d.name}" (${d.cards.length} cards)`);return true}catch(e){toast("That link or code didn't work");return false}}
+function addDeck(){const n=$("#dn").value.trim();if(!n)return;const d={id:Date.now(),name:n,cards:[]};S.decks.push(d);deckId=d.id;save();render()}
+function addCard(){const q=$("#q").value.trim(),a=$("#a").value.trim();if(!q||!a)return;deck().cards.push([q,a]);op(deck().id,q,a,1);save();gain(2,0,"card added");render()}
+function imp(){const d=deck(),a=$("#imp").value.split("\n").map(l=>l.split("|").map(x=>x.trim())).filter(p=>p.length>1&&p[0]&&p[1]);a.forEach(p=>{d.cards.push([p[0],p[1]]);op(d.id,p[0],p[1],1)});save();render()}
+function delCard(i){const d=deck(),c=d.cards.splice(i,1)[0];op(d.id,c[0],c[1],0);save();render()}
+function delDeck(){if(!confirm("Delete this deck?"))return;const dd=deck();(S.delDecks=S.delDecks||[]).push(dd.id);S.decks=S.decks.filter(d=>d.id!=dd.id);deckId=S.decks[0]?.id;save();render()}
+function study(m){const d=deck();
+if(!d){m.innerHTML='<div class="card">Create a deck first!</div>';return}
+if(!mode){m.innerHTML=`<div class="card"><h3>Pick a deck & mode</h3>${deckSel()}<div class="grid">${[["flash","🃏","Flashcards"],["quiz","📝","Practice quiz"],["match","🎮","Match game"],["ws","📄","Worksheet"]].map(([k,e,n])=>`<div class="card item" style="cursor:pointer" onclick="start('${k}')"><div class="big">${e}</div><b>${n}</b></div>`).join("")}</div></div>`;return}
+({flash:flashV,quiz:quizV,match:matchV,ws:wsV})[mode](m)}
+function start(k){const d=deck();if(d.cards.length<(k=="quiz"?2:1)){toast("Add more cards first");return}streak();mode=k;
+if(k=="flash")G={q:shuffle(d.cards),i:0,f:false,got:0};
+if(k=="quiz")G={q:shuffle(d.cards),i:0,s:0,done:false};
+if(k=="match"){const p=shuffle(d.cards).slice(0,6);G={p,t:shuffle([...p.map((c,i)=>({k:i,x:c[0],s:"q"})),...p.map((c,i)=>({k:i,x:c[1],s:"a"}))]),sel:null,ok:0,miss:0,gone:{}}}
+if(k=="ws")G={ans:false};render()}
+const back='<button class="btn noprint" onclick="mode=null;render()">← Back</button>';
+function flashV(m){if(G.i>=G.q.length){gain(5+G.got,Math.ceil(G.got/2),"deck done");m.innerHTML=`<div class="card item"><div class="big">🎉</div><h2>Round complete!</h2><p>You knew ${G.got} of ${G.q.length}.</p>${back}</div>`;G.i=-1e9;return}
+const c=G.q[G.i];m.innerHTML=`<div class="card">${back} <span class="mu">Card ${G.i+1}/${G.q.length}</span></div><div class="flip ${G.f?"f":""}" onclick="G.f=!G.f;flashV($('#main'))"><div><p>${esc(c[0])}</p><p>${esc(c[1])}</p></div></div><p class="mu" style="text-align:center">Tap card to flip</p><div class="row" style="justify-content:center"><button class="btn bad" onclick="nx(false)">Again</button><button class="btn ok" onclick="nx(true)">Got it ✓</button></div>`}
+function nx(ok){if(ok){G.got++;gain(3,1)}G.i++;G.f=false;flashV($("#main"))}
+function quizV(m){if(G.i>=G.q.length){const p=G.s==G.q.length;if(!G.done){G.done=true;if(p)gain(20,15,"perfect!")}
+m.innerHTML=`<div class="card item"><div class="big">${p?"🏆":"📊"}</div><h2>${G.s}/${G.q.length} correct</h2>${back}</div>`;return}
+const c=G.q[G.i],all=S.decks.find(x=>x.id==deckId).cards,w=shuffle(all.filter(x=>x[1]!==c[1]).map(x=>x[1]).filter((v,i,a)=>a.indexOf(v)==i)).slice(0,3),o=shuffle([c[1],...w]);G.o=o;G.c=c[1];G.lock=false;
+m.innerHTML=`<div class="card">${back} <span class="mu">Question ${G.i+1}/${G.q.length}</span><h2 style="margin-top:12px">${esc(c[0])}</h2>${o.map((x,i)=>`<button class="btn opt" onclick="pick(this,${i})">${esc(x)}</button>`).join("")}</div>`}
+function pick(b,i){if(G.lock)return;G.lock=true;const ok=G.o[i]===G.c;b.classList.add(ok?"right":"wrong");
+if(!ok)[...document.querySelectorAll(".opt")].find(x=>x.textContent===G.c)?.classList.add("right");
+if(ok){G.s++;gain(5,2)}setTimeout(()=>{G.i++;quizV($("#main"))},ok?700:1400)}
+function matchV(m){m.innerHTML=`<div class="card">${back} <span class="mu">Match each question with its answer · mistakes: ${G.miss}</span></div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">${G.t.map((t,i)=>`<div class="tile ${G.sel===i?"sel":""} ${G.gone[i]?"done":""}" onclick="tap(${i})">${esc(t.x)}</div>`).join("")}</div>`}
+function tap(i){if(G.sel===null){G.sel=i;return matchV($("#main"))}const a=G.t[G.sel],b=G.t[i];if(G.sel===i){G.sel=null;return matchV($("#main"))}
+if(a.k===b.k&&a.s!==b.s){G.gone[i]=G.gone[G.sel]=1;G.ok++;G.sel=null;matchV($("#main"));if(G.ok==G.p.length){const x=Math.max(10,40-G.miss*5);gain(x,Math.ceil(x/4),"match cleared");setTimeout(()=>{$("#main").innerHTML=`<div class="card item"><div class="big">🎉</div><h2>All matched!</h2><p>${G.miss} mistakes</p>${back}</div>`},700)}}
+else{G.miss++;const el=document.querySelectorAll(".tile")[i];G.sel=null;matchV($("#main"));document.querySelectorAll(".tile")[i].classList.add("no")}}
+function wsV(m){const d=deck();m.innerHTML=`<div class="card">${back} <button class="btn noprint" onclick="G.ans=!G.ans;wsV($('#main'))">${G.ans?"Hide":"Show"} answers</button> <button class="btn p noprint" onclick="print()">🖨 Print</button></div><div class="card ws ${G.ans?"ans":""}"><h2>${esc(d.name)} — Worksheet</h2><p>Name: ________________ Date: __________</p><ol>${d.cards.map(c=>`<li>${esc(c[0])}<br><span class="ln">${G.ans?esc(c[1]):"&nbsp;"}</span></li>`).join("")}</ol></div>`}
+function shop(m){const slot={skin:"skin",frame:"frame",avatar:"avatar"};
+m.innerHTML=["skin","frame","avatar"].map(t=>`<div class="card"><h3>${{skin:"Themes",frame:"Avatar frames",avatar:"Avatars"}[t]}</h3><div class="grid">${(t=="avatar"?FREE_AV.map(e=>({id:"f"+e,t,n:"Free",e,c:0,v:e})):t=="skin"?[{id:"s0",t,n:"Default",e:"☀️",c:0,v:""}]:[{id:"fr0",t,n:"None",e:"⚪",c:0,v:""}]).concat(SHOP.filter(x=>x.t==t)).map(x=>{const own=x.c==0||S.own.includes(x.id),on=S.eq[t]===x.v;return `<div class="card item" style="margin:0"><div class="big">${x.e}</div><b>${x.n}</b><br>${on?'<span class="mu">Equipped</span>':own?`<button class="btn" onclick="eq('${x.t}','${x.v}')">Equip</button>`:`<button class="btn p" onclick="buy('${x.id}')">🪙 ${x.c}</button>`}</div>`}).join("")}</div></div>`).join("")}
+function buy(id){const x=SHOP.find(i=>i.id==id);if(S.coins<x.c){toast("Not enough coins — keep studying!");return}S.coins-=x.c;S.own.push(id);S.eq[x.t]=x.v;save();toast(`Unlocked ${x.n}!`);render()}
+function eq(t,v){S.eq[t]=v;save();render()}
+function me(m){m.innerHTML=acct()+`<div class="card"><h3>Profile</h3><label class="mu">Display name</label><input id="nm" value="${esc(S.name)}" maxlength="20" onchange="S.name=this.value||'Student';save();head()"><p class="mu">Level ${lvl()} · ${S.xp} XP · ${S.coins} coins · ${S.own.length} cosmetics owned · ${S.streak}-day streak</p><p class="mu">Change your look in the Shop. Progress saves in this browser.</p><button class="btn bad" onclick="if(confirm('Reset all progress?')){S=structuredClone(def);save();render()}">Reset everything</button></div>`}
+if(location.hash.startsWith("#deck=")&&importCode(location.hash.slice(1))){tab="decks";try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+const sb=(window.supabase&&CFG.url.startsWith("http"))?supabase.createClient(CFG.url,CFG.key):null;
+function cloud(){return sync()}
+async function sync(tries=3){if(!sb||!user||busy)return;busy=true;
+try{for(let i=0;i<tries;i++){const v0=V,snap=JSON.parse(JSON.stringify(S));
+const {data:row,error}=await sb.from("profiles").select("data,updated_at").eq("id",user.id).maybeSingle();if(error)return;
+const c=row&&row.data,m=c?merge(c,snap):snap,ts=new Date().toISOString();let ok;
+if(row){const r=await sb.from("profiles").update({name:m.name,xp:m.xp,data:m,updated_at:ts}).eq("id",user.id).eq("updated_at",row.updated_at).select("id");ok=!r.error&&r.data&&r.data.length>0}
+else{const r=await sb.from("profiles").insert({id:user.id,name:m.name,xp:m.xp,data:m,updated_at:ts});ok=!r.error}
+if(!ok)continue;
+if(V===v0){S=m;S.base={xp:m.xp,coins:m.coins};try{localStorage.setItem("sq",JSON.stringify(S))}catch(e){}}else S.base={xp:snap.xp,coins:snap.coins};
+if(!S.decks.find(d=>d.id==deckId))deckId=S.decks[0]?.id;
+head();if(tab=="home")render();break}}catch(e){}finally{busy=false}}
+async function pull(){while(busy)await new Promise(r=>setTimeout(r,200));await sync();if(!S.decks.find(d=>d.id==deckId))deckId=S.decks[0]?.id;render()}
+async function logout(){while(busy)await new Promise(r=>setTimeout(r,200));await sync();await sb.auth.signOut()}
+function op(id,q,a,alive){(S.ops=S.ops||{})[JSON.stringify([id,q,a])]={t:Date.now(),a:alive}}
+function merge(c,l){const m=Object.assign({},def,c),b=l.base||{xp:0,coins:def.coins};
+m.xp=(c.xp||0)+Math.max(0,l.xp-b.xp);m.coins=Math.max(0,(c.coins||0)+(l.coins-b.coins));
+m.own=[...new Set([...(c.own||[]),...(l.own||[])])];
+m.eq={};for(const k of["skin","frame","avatar"])m.eq[k]=(c.eq&&c.eq[k])||l.eq[k]||"";
+m.ops=Object.assign({},c.ops);for(const k in l.ops)if(!m.ops[k]||l.ops[k].t>m.ops[k].t)m.ops[k]=l.ops[k];
+m.delDecks=[...new Set([...(c.delDecks||[]),...(l.delDecks||[])])];
+const dm={};for(const d of[...(c.decks||[]),...(l.decks||[])]){if(m.delDecks.includes(d.id))continue;const o=dm[d.id]||(dm[d.id]={id:d.id,name:d.name,cards:[]}),seen=new Set(o.cards.map(x=>JSON.stringify(x)));
+for(const x of d.cards){const k=JSON.stringify(x);if(seen.has(k))continue;const p=m.ops[JSON.stringify([d.id,x[0],x[1]])];if(p&&!p.a)continue;seen.add(k);o.cards.push(x)}}
+m.decks=Object.values(dm);
+const t=x=>x?Date.parse(x)||0:0;if(t(l.last)>t(c.last)){m.last=l.last;m.streak=l.streak}else if(t(l.last)==t(c.last))m.streak=Math.max(c.streak||0,l.streak||0);
+if(!c.name||c.name=="Student")m.name=l.name;
+return m}
+function acct(){if(!sb)return '<div class="card"><h3>☁️ Cloud account</h3><p class="mu">Not connected yet. Add your Supabase URL and key at the top of the script.</p></div>';
+if(user)return `<div class="card"><h3>☁️ Cloud account</h3><p class="mu">Signed in as ${esc(user.email)} · progress syncs automatically.</p><button class="btn" onclick="logout()">Log out</button></div>`;
+return `<div class="card"><h3>☁️ Cloud account</h3><p class="mu">Log in to sync across devices, publish decks, and join the leaderboard.</p><input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Password (6+ characters)"><div class="row"><button class="btn p" onclick="auth(0)">Log in</button><button class="btn" onclick="auth(1)">Sign up</button></div></div>`}
+async function auth(up){const c={email:$("#em").value.trim(),password:$("#pw").value};const {error,data}=up?await sb.auth.signUp(c):await sb.auth.signInWithPassword(c);if(error)toast(error.message);else if(up&&!data.session)toast("Check your email to confirm")}
+async function pubDeck(){if(!sb||!user){toast("Log in first (Profile tab)");return}const d=deck();if(d.cards.length<2){toast("Add at least 2 cards");return}const {error}=await sb.from("shared_decks").insert({owner:user.id,owner_name:S.name,name:d.name.replace(/^Sample: /,""),cards:d.cards});if(error)toast(error.message);else gain(15,5,"deck published")}
+let LQ="",LD=[];
+async function lib(m){if(!sb){m.innerHTML='<div class="card"><h3>🌐 Library</h3><p class="mu">Connect Supabase to unlock the shared library.</p></div>';return}
+m.innerHTML='<div class="card">Loading…</div>';
+let q=sb.from("shared_decks").select("*").order("created_at",{ascending:false}).limit(30);if(LQ)q=q.ilike("name","%"+LQ+"%");
+const [r,l]=await Promise.all([q,sb.from("leaderboard").select("*")]);LD=r.data||[];
+m.innerHTML=`<div class="card"><h3>🌐 Shared decks</h3><input placeholder="Search decks…" value="${esc(LQ)}" onchange="LQ=this.value;render()">${LD.map((x,i)=>`<div class="row" style="border-top:1px solid var(--bd);padding:8px 0"><span class="grow"><b>${esc(x.name)}</b> · ${x.cards.length} cards<br><span class="mu">by ${esc(x.owner_name||"Student")}</span></span><button class="btn p" onclick="getDeck(${i})">Add</button>${user&&x.owner===user.id?`<button class="btn" onclick="rmDeck('${x.id}')">✕</button>`:""}</div>`).join("")||'<p class="mu">Nothing here yet. Publish the first deck!</p>'}</div>
+<div class="card"><h3>🏆 Leaderboard</h3>${(l.data||[]).map((x,i)=>`<div class="row"><span>${i+1}.</span><span class="grow">${esc(x.name||"Student")}</span><b>${x.xp} XP</b></div>`).join("")||'<p class="mu">No players yet.</p>'}</div>`}
+function getDeck(i){const x=LD[i];S.decks.push({id:Date.now(),name:x.name,cards:x.cards});deckId=S.decks[S.decks.length-1].id;save();toast("Added to your decks");go("decks")}
+async function rmDeck(id){if(confirm("Remove from library?")){await sb.from("shared_decks").delete().eq("id",id);render()}}
+if(sb)sb.auth.onAuthStateChange((e,s)=>{const u=s?.user||null,was=user;user=u;if(u&&(!was||was.id!==u.id))pull();else if(!u&&was){S=structuredClone(def);deckId=S.decks[0].id;try{localStorage.setItem("sq",JSON.stringify(S))}catch(e){}render()}});
+render();
+</script></body></html>
